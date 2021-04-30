@@ -143,7 +143,7 @@ export const compilePages = (pages: Page[]) => {
 	// Remove all unnecessary files
 
 	for (const pageToRemove of pagesToRemove) {
-		const pagePath = './root'
+		const pagePath = './root' + pageToRemove
 
 		if (fs.existsSync(pagePath)) {
 			// Security
