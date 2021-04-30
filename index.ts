@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import * as https from 'https'
 import * as chalk from 'chalk'
 import { resolve as resolvePath } from 'path'
 import { db } from 'node-json-database'
@@ -168,3 +169,45 @@ export const compilePages = (pages: Page[]) => {
 
 	console.log(`${ chalk.green('✔') } Finished compilation in ${ Date.now() - start }ms`)
 }
+
+export const inlineJS = (path: string) => /* html */ `
+<script>
+	${ fs.readFileSync(path, 'utf-8') }
+</script>
+`
+
+export const inlineCSS = (path: string) => /* html */ `
+<style>
+	${ fs.readFileSync(path, 'utf-8') }
+</style>
+`
+
+export const inlineExternalJS = (url: string) => new Promise(resolve => {
+	let html = '<script>'
+
+	https.get(url, res => {
+		let content = ''
+
+		res.on('data', chunk => content += chunk)
+
+		res.on('end', () => {
+			html += content + '</script>'
+			resolve(html)
+		})
+	})
+})
+
+export const inlineExternalCSS = (url: string) => new Promise(resolve => {
+	let html = '<style>'
+
+	https.get(url, res => {
+		let content = ''
+
+		res.on('data', chunk => content += chunk)
+
+		res.on('end', () => {
+			html += content + '</style>'
+			resolve(html)
+		})
+	})
+})
