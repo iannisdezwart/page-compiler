@@ -2,22 +2,30 @@ import * as fs from 'fs'
 import { resolve as resolvePath } from 'path'
 import * as chalk from 'chalk'
 
-export const getDirectory = (path: string) => {
-	let i = path.length - 1
-	while (path.charAt(i) != '/' && path.length > 0) i--
-	return path.slice(0, i)
-}
+export class FilePath {
+	directory: string
+	filename: string
+	extension: string
 
-export const getFilename = (path: string) => {
-	let i = path.length - 1
-	while (path.charAt(i) != '/' && path.length > 0) i--
-	return path.slice(i + 1)
-}
+	constructor(path: string) {
+		let i = path.length - 1
 
-export const getFilenameWithoutExtension = (filename: string) => {
-	let i = filename.length - 1
-	while (filename.charAt(i) != '.' && filename.length > 0) i--
-	return filename.slice(0, i)
+		while (path.charAt(i) != '/' && i > 0) i--
+
+		const filenameAndExtension = path.slice(i + 1)
+		this.directory = path.slice(0, i)
+
+		i = filenameAndExtension.length - 1
+
+		while (filenameAndExtension.charAt(i) != '.' && i > 0) i--
+
+		if (i == 0) {
+			this.filename = filenameAndExtension
+		} else {
+			this.filename = filenameAndExtension.slice(0, i)
+			this.extension = filenameAndExtension.slice(i + 1)
+		}
+	}
 }
 
 export const deleteEmptyDirectories = (dirPath: string) => {

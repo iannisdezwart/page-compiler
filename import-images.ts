@@ -3,11 +3,7 @@ import { resolve as resolvePath } from 'path'
 import * as chalk from 'chalk'
 import * as graphicsMagick from 'gm'
 import imageSize from 'image-size'
-import {
-	getDirectory,
-	getFilename,
-	getFilenameWithoutExtension
-} from './util'
+import { FilePath } from './util'
 
 const standardImageDimensions = [ 640, 900, 1280, 1920, 2560, 3840 ]
 
@@ -52,10 +48,9 @@ export const importJPG = (
 	}
 
 	const imageDimensions = standardImageDimensions.map(el => el * options.widthRatio)
-	const inputDirectory = getDirectory(path)
-	const filename = getFilename(path)
-	const filenameWithoutExtension = `${ getFilenameWithoutExtension(filename) }-${ options.widthRatio }`
-	const outputDirectory = `root/res/${ inputDirectory }`
+	const inputFilePath = new FilePath(path)
+	const outputFilename = `${ inputFilePath.filename }-${ options.widthRatio }`
+	const outputDirectory = `root/res/${ inputFilePath.directory }`
 	let finishedImages = 0
 
 	// Create output directory, if needed
@@ -77,22 +72,22 @@ export const importJPG = (
 			var width = screen.width * devicePixelRatio;
 
 			if (width <= 640) {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-640.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-640.jpg';
 			}
 			else if (width <= 900) {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-900.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-900.jpg';
 			}
 			else if (width <= 1280) {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-1280.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-1280.jpg';
 			}
 			else if (width <= 1920) {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-1920.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-1920.jpg';
 			}
 			else if (width <= 2560) {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-2560.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-2560.jpg';
 			}
 			else {
-				img.src = '/res/${ inputDirectory }/${ filenameWithoutExtension }-3840.jpg';
+				img.src = '/res/${ inputFilePath.directory }/${ outputFilename }-3840.jpg';
 			}
 		</script>
 		`)
@@ -103,7 +98,7 @@ export const importJPG = (
 	let imagesAlreadyProcessed = true
 
 	for (const standardDimension of standardImageDimensions) {
-		if (!fs.existsSync(`${ outputDirectory }/${ filenameWithoutExtension }-${ standardDimension }.jpg`)) {
+		if (!fs.existsSync(`${ outputDirectory }/${ outputFilename }-${ standardDimension }.jpg`)) {
 			imagesAlreadyProcessed = false
 			break
 		}
@@ -120,7 +115,7 @@ export const importJPG = (
 		const dimension = imageDimensions[i]
 		const standardDimension = standardImageDimensions[i]
 
-		const outputPath = `${ outputDirectory }/${ filenameWithoutExtension }-${ standardDimension }.jpg`
+		const outputPath = `${ outputDirectory }/${ outputFilename }-${ standardDimension }.jpg`
 
 		imageMagick(path)
 			.resize(dimension, dimension / aspectRatio, '>')

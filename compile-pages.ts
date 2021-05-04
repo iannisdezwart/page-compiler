@@ -2,11 +2,7 @@ import * as fs from 'fs'
 import { resolve as resolvePath } from 'path'
 import { db } from 'node-json-database'
 import * as chalk from 'chalk'
-import {
-	deleteEmptyDirectories,
-	dotDotSlashAttack,
-	getDirectory
-} from './util'
+import { deleteEmptyDirectories, dotDotSlashAttack, FilePath } from './util'
 
 interface Page {
 	html: string
@@ -66,11 +62,11 @@ export const compilePages = (pages: Page[]) => {
 	for (const page of pages) {
 		// Create directory, if needed
 
-		const directory = getDirectory('./root' + page.path)
+		const filePath = new FilePath('./root' + page.path)
 
-		if (!fs.existsSync(directory)) {
-			fs.mkdirSync(directory, { recursive: true })
-			console.log(`${ chalk.green('✔') } Created directory: ${ chalk.yellow(directory) }`)
+		if (!fs.existsSync(filePath.directory)) {
+			fs.mkdirSync(filePath.directory, { recursive: true })
+			console.log(`${ chalk.green('✔') } Created directory: ${ chalk.yellow(filePath.directory) }`)
 		}
 
 		// Security
