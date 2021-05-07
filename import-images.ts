@@ -3,6 +3,7 @@ import { resolve as resolvePath } from 'path'
 import * as chalk from 'chalk'
 import * as graphicsMagick from 'gm'
 import imageSize from 'image-size'
+import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
 import { FilePath } from './util'
 
 const standardImageDimensions = [
@@ -159,3 +160,39 @@ export const importJPG = (
 			imageState.write(outputPath + '.jpg', imageWriteCallback(outputPath + '.jpg'))
 	}
 })
+
+interface ImportSVGOptions {
+	alt?: string
+	id?: string
+	classes?: string[]
+}
+
+export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
+	options = {
+		alt: '',
+		classes: [],
+		...options
+	}
+
+	const svgFile = fs.readFileSync(path, 'utf-8')
+	const svg = parseXML(svgFile)
+
+	if (options.id != null) {
+		svg.attributes.set('id', options.id)
+	}
+
+	if (options.classes.length > 0) {
+		svg.attributes.set('class', options.classes.join(' '))
+	}
+
+	svg.children.unshift(new XMLNode('title', {}, [ options.alt ]))
+
+	return buildXML(svg, { indentationSize: 0, seperator: '' })
+}
+
+export const inlineSVGBackgroundImage = (path: string) => {
+	const svgFile = fs.readFileSync(path, 'utf-8')
+	const svg = parseXML(svgFile)
+
+	return encodeURI('data:image/svg+xml;base64,' + Buffer.from(buildXML(svg, { indentationSize: 0, seperator: '' })).toString('base64'))
+}
