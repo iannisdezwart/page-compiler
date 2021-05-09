@@ -1,3 +1,5 @@
 export * from './compile-pages'
 export * from './inline-code'
 export * from './import-images'
+export * from './import-fonts'
+export * from './pwa'
