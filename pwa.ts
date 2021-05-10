@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { FilePath, scaleImages } from './util'
 import * as mime from 'mime-types'
+import { PageShell } from './page-shell'
 
 interface PWAManifestProtocolHandler {
 	protocol: string
@@ -44,7 +45,7 @@ interface PWAManifest {
 	themeColour?: string
 }
 
-export const createPWAManifest = async (manifest: PWAManifest) => {
+export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) => {
 	const json = {}
 
 	if (manifest.backgroundColour != null) {
@@ -139,4 +140,8 @@ export const createPWAManifest = async (manifest: PWAManifest) => {
 	}
 
 	fs.writeFileSync('root/manifest.json', JSON.stringify(json))
+
+	page.appendToHead(/* html */ `
+	<link rel="manifest" href="/manifest.json">
+	`)
 }

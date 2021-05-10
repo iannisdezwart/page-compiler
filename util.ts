@@ -82,6 +82,11 @@ export const scaleImages = (
 		resolve()
 	}
 
+	const increment = () => {
+		finishedImages++
+		if (finishedImages == dimensions.length) finish()
+	}
+
 	const imageWriteCallback = (path: string) => (err: Error) => {
 		if (err != null) {
 			console.error('error while converting image:', err)
@@ -90,12 +95,15 @@ export const scaleImages = (
 
 		console.log(`${ chalk.green('✔') } Processed image: ${ chalk.yellow(resolvePath(path)) }`)
 
-		finishedImages++
-		if (finishedImages == dimensions.length) finish()
+		increment()
 	}
 
 	for (const dimension of dimensions) {
 		const outputFilePath = `${ outputDirectory }/${ outputFilename }-${ dimension.width }x${ dimension.height }.${ filePath.extension }`
+		if (fs.existsSync(outputFilePath)) {
+			increment()
+			continue
+		}
 
 		imageMagick(inputPath)
 			.resize(dimension.width, dimension.height, '>')
