@@ -92,18 +92,24 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 		}
 
 		if (manifest.icon.png != null) {
-			const sizes = [ 72, 96, 128, 144, 152, 192, 384, 512 ]
-			const { extension } = new FilePath(manifest.icon.png)
+			const sizes = [ 16, 32, 72, 96, 128, 144, 152, 192, 384, 512 ]
 
 			await scaleImages(manifest.icon.png,
 				sizes.map(size => ({ width: size, height: size })),
 				90, 'root/res/pwa', 'icon')
 
 			json['icons'].push(...sizes.map(size => ({
-				src: `/res/pwa/icon-${ size }x${ size }.${ extension }`,
+				src: `/res/pwa/icon-${ size }x${ size }.png`,
 				sizes: `${ size }x${ size }`,
-				type: mime.lookup(extension)
+				type: 'image/png'
 			})))
+
+			page.appendToHead(/* html */ `
+			<link rel="icon" type="image/png" href="/res/pwa/icon-16x16.png" sizes="16x16">
+			<link rel="icon" type="image/png" href="/res/pwa/icon-32x32.png" sizes="32x32">
+			<link rel="icon" type="image/png" href="/res/pwa/icon-96x96.png" sizes="96x96">
+			<link rel="apple-touch-icon" type="image/png" href="/res/pwa/icon-192x192.png" sizes="192x192.png">
+			`)
 		}
 	}
 
@@ -153,6 +159,9 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 
 	if (manifest.themeColour != null) {
 		json['theme_color'] = manifest.themeColour
+		page.appendToHead(/* html */ `
+		<meta name="apple-mobile-web-app-status-bar" content="${ manifest.themeColour }">
+		`)
 	}
 
 	fs.writeFileSync('root/manifest.json', JSON.stringify(json))
