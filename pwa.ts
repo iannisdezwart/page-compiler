@@ -161,3 +161,15 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 	<link rel="manifest" href="/manifest.json">
 	`)
 }
+
+export const importServiceWorker = (path: string) => {
+	fs.copyFileSync(path, 'root/service-worker.js')
+
+	return /* html */ `
+	<script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/service-worker.js')
+		}
+	</script>
+	`
+}
