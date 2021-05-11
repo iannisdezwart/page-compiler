@@ -29,7 +29,10 @@ interface PWAManifest {
 	dir?: 'auto' | 'ltr' | 'rtl'
 	display?: 'fullscreen' | 'standalone' | 'minimal-ui' | 'browser'
 	iarcRatingID?: string
-	icon: string
+	icon: {
+		svg?: string
+		png?: string
+	}
 	lang?: string
 	name: string
 	orientation?: 'any' | 'natural' | 'landscape' | 'landscape-primary'
@@ -77,18 +80,31 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 			fs.mkdirSync('root/res/pwa', { recursive: true })
 		}
 
-		const sizes = [ 72, 96, 128, 144, 152, 192, 384, 512 ]
-		const { extension } = new FilePath(manifest.icon)
+		json['icons'] = []
 
-		await scaleImages(manifest.icon,
-			sizes.map(size => ({ width: size, height: size })),
-			90, 'root/res/pwa', 'icon')
+		if (manifest.icon.svg != null) {
+			fs.copyFileSync(manifest.icon.svg, 'root/res/pwa/icon.svg')
 
-		json['icons'] = sizes.map(size => ({
-			src: `res/pwa/icon-${ size }x${ size }.${ extension }`,
-			sizes: `${ size }x${ size }`,
-			type: mime.lookup(extension)
-		}))
+			json['icons'].push({
+				src: '/res/pwa/icon.svg',
+				type: 'image/svg'
+			})
+		}
+
+		if (manifest.icon.png != null) {
+			const sizes = [ 72, 96, 128, 144, 152, 192, 384, 512 ]
+			const { extension } = new FilePath(manifest.icon.png)
+
+			await scaleImages(manifest.icon.png,
+				sizes.map(size => ({ width: size, height: size })),
+				90, 'root/res/pwa', 'icon')
+
+			json['icons'].push(...sizes.map(size => ({
+				src: `/res/pwa/icon-${ size }x${ size }.${ extension }`,
+				sizes: `${ size }x${ size }`,
+				type: mime.lookup(extension)
+			})))
+		}
 	}
 
 	if (manifest.lang != null) {
