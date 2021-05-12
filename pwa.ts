@@ -1,6 +1,6 @@
 import * as fs from 'fs'
-import { FilePath, scaleImages } from './util'
-import * as mime from 'mime-types'
+import { scaleImages } from './util'
+import imageSize from 'image-size'
 import { PageShell } from './page-shell'
 
 interface PWAManifestProtocolHandler {
@@ -32,6 +32,8 @@ interface PWAManifest {
 	icon: {
 		svg?: string
 		png?: string
+		maskableSvg?: string
+		maskablePng?: string
 	}
 	lang?: string
 	name: string
@@ -83,11 +85,25 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 		json['icons'] = []
 
 		if (manifest.icon.svg != null) {
+			const { width, height } = imageSize(manifest.icon.svg)
 			fs.copyFileSync(manifest.icon.svg, 'root/res/pwa/icon.svg')
 
 			json['icons'].push({
 				src: '/res/pwa/icon.svg',
+				sizes: `${ width }x${ height }`,
 				type: 'image/svg'
+			})
+		}
+
+		if (manifest.icon.maskableSvg != null) {
+			const { width, height } = imageSize(manifest.icon.maskableSvg)
+			fs.copyFileSync(manifest.icon.maskableSvg, 'root/res/pwa/maskable-icon.svg')
+
+			json['icons'].push({
+				src: '/res/pwa/maskable-icon.svg',
+				sizes: `${ width }x${ height }`,
+				type: 'image/svg',
+				purpose: 'any maskable'
 			})
 		}
 
@@ -110,6 +126,21 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 			<link rel="icon" type="image/png" href="/res/pwa/icon-96x96.png" sizes="96x96">
 			<link rel="apple-touch-icon" type="image/png" href="/res/pwa/icon-192x192.png" sizes="192x192.png">
 			`)
+		}
+
+		if (manifest.icon.maskablePng != null) {
+			const sizes = [ 16, 32, 72, 96, 128, 144, 152, 192, 384, 512 ]
+
+			await scaleImages(manifest.icon.maskablePng,
+				sizes.map(size => ({ width: size, height: size })),
+				90, 'root/res/pwa', 'maskable-icon')
+
+			json['icons'].push(...sizes.map(size => ({
+				src: `/res/pwa/maskable-icon-${ size }x${ size }.png`,
+				sizes: `${ size }x${ size }`,
+				type: 'image/png',
+				purpose: 'any maskable'
+			})))
 		}
 	}
 
@@ -160,6 +191,7 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 	if (manifest.themeColour != null) {
 		json['theme_color'] = manifest.themeColour
 		page.appendToHead(/* html */ `
+		<meta name="theme-color" content="${ manifest.themeColour }">
 		<meta name="apple-mobile-web-app-status-bar" content="${ manifest.themeColour }">
 		`)
 	}
