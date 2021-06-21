@@ -1,6 +1,6 @@
 {
   "name": "page-compiler",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "image-size": "^1.0.0",
     "mime-types": "^2.1.30",
     "node-json-database": "^0.0.34",
-    "node-xml-parser": "^0.0.2"
+    "node-xml-parser": "^0.0.4"
   },
   "devDependencies": {
     "@types/gm": "^1.18.9",
