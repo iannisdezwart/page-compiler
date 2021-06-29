@@ -105,7 +105,7 @@ export const importJPG = (
 			${ createSource(3840, 'jpg') }
 			<img src="/res/${ inputFilePath.directory }/${ outputFilename }-640.jpg?cache-age=604800"
 				alt="${ alt }" ${ options.id == null ? '' : `id="${ options.id }"` }
-				${ options.classes.length == 0 ? '' : `class=${ options.classes.join(' ') }` }>
+				${ options.classes.length == 0 ? '' : `class="${ options.classes.join(' ') }"` }>
 		</picture>
 		`)
 	}
