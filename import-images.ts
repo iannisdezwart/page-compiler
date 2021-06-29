@@ -73,7 +73,7 @@ export const importJPG = (
 
 	const finish = () => {
 		const createURL = (size: number, extension: string) => {
-			return encodeURIComponent(`/res/${ inputFilePath.directory }/${ outputFilename }-${ size }.${ extension }?cache-age=604800`)
+			return encodeURI(`/res/${ inputFilePath.directory }/${ outputFilename }-${ size }.${ extension }?cache-age=604800`)
 		}
 
 		const createSource = (size: number, extension: string) => {
