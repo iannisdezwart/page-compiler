@@ -58,8 +58,8 @@ export const importJPG = (
 
 	const imageDimensions = standardImageDimensions.map(el => el * options.widthRatio)
 	const inputFilePath = new FilePath(path)
-	const outputFilename = encodeURIComponent(`${ inputFilePath.filename }-${ options.widthRatio }`)
-	const outputDirectory = encodeURIComponent(`root/res/${ inputFilePath.directory }`)
+	const outputFilename = `${ inputFilePath.filename }-${ options.widthRatio }`
+	const outputDirectory = `root/res/${ inputFilePath.directory }`
 	let finishedImages = 0
 
 	// Create output directory, if needed
@@ -73,7 +73,7 @@ export const importJPG = (
 
 	const finish = () => {
 		const createURL = (size: number, extension: string) => {
-			return `/res/${ inputFilePath.directory }/${ outputFilename }-${ size }.${ extension }?cache-age=604800`
+			return encodeURIComponent(`/res/${ inputFilePath.directory }/${ outputFilename }-${ size }.${ extension }?cache-age=604800`)
 		}
 
 		const createSource = (size: number, extension: string) => {
