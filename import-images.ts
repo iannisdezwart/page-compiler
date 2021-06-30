@@ -33,7 +33,7 @@ export const importJPG = (
 ) => new Promise<string>(resolve => {
 	// Get width, height & aspect ratio of image
 
-	const { width, height } = imageSize(path)
+	const { width, height } = imageSize(fs.readFileSync(path))
 	const aspectRatio = width / height
 
 	// Set default options
