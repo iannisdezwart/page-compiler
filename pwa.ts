@@ -76,7 +76,7 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 	if (manifest.iarcRatingID != null) {
 		json['iarc_rating_id'] = manifest.iarcRatingID
 	}
-
+imageSize
 	if (manifest.icon != null) {
 		if (!fs.existsSync('root/res/pwa')) {
 			fs.mkdirSync('root/res/pwa', { recursive: true })
@@ -85,7 +85,7 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 		json['icons'] = []
 
 		if (manifest.icon.svg != null) {
-			const { width, height } = imageSize(manifest.icon.svg)
+			const { width, height } = imageSize(fs.readFileSync(manifest.icon.svg))
 			fs.copyFileSync(manifest.icon.svg, 'root/res/pwa/icon.svg')
 
 			json['icons'].push({
@@ -96,7 +96,7 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 		}
 
 		if (manifest.icon.maskableSvg != null) {
-			const { width, height } = imageSize(manifest.icon.maskableSvg)
+			const { width, height } = imageSize(fs.readFileSync(manifest.icon.maskableSvg))
 			fs.copyFileSync(manifest.icon.maskableSvg, 'root/res/pwa/maskable-icon.svg')
 
 			json['icons'].push({
