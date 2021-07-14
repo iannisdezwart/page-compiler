@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { resolve, resolve as resolvePath } from 'path'
+import { resolve as resolvePath } from 'path'
 import * as graphicsMagick from 'gm'
 import * as chalk from 'chalk'
 
@@ -11,10 +11,10 @@ export class FilePath {
 	constructor(path: string) {
 		let i = path.length - 1
 
-		while (path.charAt(i) != '/' && i > 0) i--
+		while (path.charAt(i) != '/' && i >= 0) i--
 
 		const filenameAndExtension = path.slice(i + 1)
-		this.directory = path.slice(0, i)
+		this.directory = path.slice(0, i + 1)
 
 		i = filenameAndExtension.length - 1
 
@@ -22,10 +22,19 @@ export class FilePath {
 
 		if (i == 0) {
 			this.filename = filenameAndExtension
+			this.extension = ''
 		} else {
-			this.filename = filenameAndExtension.slice(0, i)
-			this.extension = filenameAndExtension.slice(i + 1)
+			this.filename = filenameAndExtension.slice(0, i) ?? ''
+			this.extension = filenameAndExtension.slice(i + 1) ?? ''
 		}
+	}
+
+	fullFilename() {
+		if (this.extension == '') {
+			return this.filename
+		}
+
+		return `${ this.filename }.${ this.extension }`
 	}
 }
 
