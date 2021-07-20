@@ -1,5 +1,11 @@
 import * as fs from 'fs'
 import * as https from 'https'
+import * as LRU from 'lru-cache'
+
+const scriptCache = new LRU<string, string>({
+	max: 100 * 1024 * 1024, // 100 MB
+	length: value => value.length
+})
 
 export const inlineJS = (path: string) => /* html */ `
 <script>
@@ -14,6 +20,11 @@ export const inlineCSS = (path: string) => /* html */ `
 `
 
 export const inlineExternalJS = (url: string) => new Promise<string>(resolve => {
+	if (scriptCache.has(url)) {
+		resolve(scriptCache.get(url))
+		return
+	}
+
 	let html = '<script>'
 
 	https.get(url, res => {
@@ -23,12 +34,18 @@ export const inlineExternalJS = (url: string) => new Promise<string>(resolve => 
 
 		res.on('end', () => {
 			html += content + '</script>'
+			scriptCache.set(url, html)
 			resolve(html)
 		})
 	})
 })
 
 export const inlineExternalCSS = (url: string) => new Promise<string>(resolve => {
+	if (scriptCache.has(url)) {
+		resolve(scriptCache.get(url))
+		return
+	}
+
 	let html = '<style>'
 
 	https.get(url, res => {
@@ -38,6 +55,7 @@ export const inlineExternalCSS = (url: string) => new Promise<string>(resolve =>
 
 		res.on('end', () => {
 			html += content + '</style>'
+			scriptCache.set(url, html)
 			resolve(html)
 		})
 	})
