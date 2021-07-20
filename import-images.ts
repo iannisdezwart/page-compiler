@@ -7,14 +7,17 @@ import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
 import { FilePath } from './util'
 
 const standardImageDimensions = [
-	640, 960, 1280, 1440, 1600, 1920, 2400, 2560, 2880, 3200, 3840
+	640, 960, 1280, 1920, 2560, 3840
 ]
 
-// 1.0x: [  640,  960, 1280, 1920, 2560, 3840 ]
-// 1.5x: [  960, 1440, 1920, 2880, 3840, 3840 ]
-// 2.0x: [ 1280, 1920, 2560, 3840, 3840, 3840 ]
-// 2.5x: [ 1600, 2400, 3200, 3840, 3840, 3840 ]
-// 3.0x: [ 1920, 2880, 3840, 3840, 3840, 3840 ]
+const imageScales = new Map<number, [ number, number, number, number, number ]>([
+	[  640, [  640,  960, 1280, 1920, 1920 ] ],
+	[  960, [  960, 1920, 1920, 2560, 3840 ] ],
+	[ 1280, [ 1280, 1920, 2560, 3840, 3840 ] ],
+	[ 1920, [ 1920, 2560, 3840, 3840, 3840 ] ],
+	[ 2560, [ 2560, 3840, 3840, 3840, 3840 ] ],
+	[ 3840, [ 3840, 3840, 3840, 3840, 3840 ] ],
+])
 
 interface ImportImageOptions {
 	widthRatio?: number
@@ -77,11 +80,13 @@ export const importJPG = (
 		}
 
 		const createSource = (size: number, extension: string) => {
-			const url1x = createURL(size, extension)
-			const url1_5x = createURL(Math.min(3840, size * 1.5), extension)
-			const url2x = createURL(Math.min(3840, size * 2), extension)
-			const url2_5x = createURL(Math.min(3840, size * 2.5), extension)
-			const url3x = createURL(Math.min(3840, size * 3), extension)
+			const sizes = imageScales.get(size)
+
+			const url1x = createURL(sizes[0], extension)
+			const url1_5x = createURL(sizes[1], extension)
+			const url2x = createURL(sizes[2], extension)
+			const url2_5x = createURL(sizes[3], extension)
+			const url3x = createURL(sizes[4], extension)
 
 			return /* html */ `
 			<source type="image/${ extension }" media="(max-width: ${ size }px)"
