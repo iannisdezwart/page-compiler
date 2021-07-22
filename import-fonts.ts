@@ -11,7 +11,18 @@ interface FontStyle {
 	italic: boolean
 }
 
-export const importGoogleFont = async (fontFamily: string, styles: FontStyle[]) => {
+type CharacterSet = [ number, number ]
+
+export const characterSets: { [ name: string ]: CharacterSet } = {
+	basicLatin: [ 0x20, 0x7f ],
+	latinExtended: [ 0xa0, 0x24f ]
+}
+
+export const importGoogleFont = async (
+	fontFamily: string,
+	styles: FontStyle[],
+	charSets: CharacterSet[] = null
+) => {
 	const stylesString = styles
 		.sort((a, b) => {
 			if (a.italic && !b.italic) return 1
@@ -21,7 +32,19 @@ export const importGoogleFont = async (fontFamily: string, styles: FontStyle[]) 
 		.map(style => `${ style.italic ? 1 : 0 },${ style.weight }`)
 		.join(';')
 
-	const url = `https://fonts.googleapis.com/css2?family=${ fontFamily }:ital,wght@${ stylesString }&display=swap`
+	let url = `https://fonts.googleapis.com/css2?family=${ fontFamily }:ital,wght@${ stylesString }&display=swap`
+
+	if (charSets != null) {
+		let text = ''
+
+		for (const charSet of charSets) {
+			for (let i = charSet[0]; i <= charSet[1]; i++) {
+				text += String.fromCharCode(i)
+			}
+		}
+
+		url += `&text=${ encodeURI(text) }`
+	}
 
 	if (fontCache.has(url)) return fontCache.get(url)
 
