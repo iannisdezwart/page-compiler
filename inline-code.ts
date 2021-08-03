@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as https from 'https'
 import * as LRU from 'lru-cache'
+import * as sass from 'sass'
 
 const scriptCache = new LRU<string, string>({
 	max: 100 * 1024 * 1024, // 100 MB
@@ -18,6 +19,21 @@ export const inlineCSS = (path: string) => /* html */ `
 	${ fs.readFileSync(path, 'utf-8') }
 </style>
 `
+
+export const inlineSASS = (path: string) => {
+	if (scriptCache.has(path)) {
+		return scriptCache.get(path)
+	}
+
+	const compiledCSS = sass.renderSync({ file: path }).css.toString()
+	scriptCache.set(path, compiledCSS)
+
+	return /* html */ `
+	<style>
+		${ compiledCSS }
+	</style>
+	`
+}
 
 export const inlineExternalJS = (url: string) => new Promise<string>(resolve => {
 	if (scriptCache.has(url)) {
