@@ -76,7 +76,7 @@ export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) 
 	if (manifest.iarcRatingID != null) {
 		json['iarc_rating_id'] = manifest.iarcRatingID
 	}
-imageSize
+
 	if (manifest.icon != null) {
 		if (!fs.existsSync('root/res/pwa')) {
 			fs.mkdirSync('root/res/pwa', { recursive: true })

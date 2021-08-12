@@ -8,7 +8,7 @@ const fontCache = new LRU<string, string>({
 
 interface FontStyle {
 	weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
-	italic: boolean
+	italic?: boolean
 }
 
 type CharacterSet = [ number, number ]
@@ -43,7 +43,7 @@ export const importGoogleFont = async (
 			}
 		}
 
-		url += `&text=${ encodeURI(text) }`
+		url += `&text=${ encodeURIComponent(text) }`
 	}
 
 	if (fontCache.has(url)) return fontCache.get(url)

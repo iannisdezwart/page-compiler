@@ -21,18 +21,18 @@ const imageScales = new Map<number, [ number, number, number, number, number ]>(
 
 interface ImportImageOptions {
 	widthRatio?: number
-	heightRatio?: number,
+	heightRatio?: number
 	quality?: number
-	id?: string,
+	id?: string
 	classes?: string[]
+	alt: string
 }
 
 const imageMagick = graphicsMagick.subClass({ imageMagick: true })
 
 export const importJPG = (
 	path: string,
-	alt: string,
-	options: ImportImageOptions = {}
+	options: ImportImageOptions
 ) => new Promise<string>(resolve => {
 	// Get width, height & aspect ratio of image
 
@@ -109,7 +109,7 @@ export const importJPG = (
 			${ createSource(3840, 'webp') }
 			${ createSource(3840, 'jpg') }
 			<img src="/res/${ inputFilePath.directory }/${ outputFilename }-640.jpg?cache-age=604800"
-				alt="${ alt }" ${ options.id == null ? '' : `id="${ options.id }"` }
+				alt="${ options.alt }" ${ options.id == null ? '' : `id="${ options.id }"` }
 				${ options.classes.length == 0 ? '' : `class="${ options.classes.join(' ') }"` }>
 		</picture>
 		`)
