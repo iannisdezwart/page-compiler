@@ -2,30 +2,44 @@ import * as fs from 'fs'
 import * as https from 'https'
 import * as LRU from 'lru-cache'
 import * as sass from 'sass'
+import * as autoprefixer from 'autoprefixer'
+import postcss from 'postcss'
 
 const scriptCache = new LRU<string, string>({
 	max: 100 * 1024 * 1024, // 100 MB
 	length: value => value.length
 })
 
-export const inlineJS = (path: string) => /* html */ `
+const prefixCSS = (css: string) => new Promise<string>(resolve => {
+	postcss([ autoprefixer ]).process(css).then(result => {
+		const warnings = result.warnings()
+
+		for (const warning of warnings) {
+			console.error(warning)
+		}
+
+		resolve(result.css)
+	})
+})
+
+export const inlineJS = async (path: string) => /* html */ `
 <script>
 	${ fs.readFileSync(path, 'utf-8') }
 </script>
 `
 
-export const inlineCSS = (path: string) => /* html */ `
+export const inlineCSS = async (path: string) => /* html */ `
 <style>
-	${ fs.readFileSync(path, 'utf-8') }
+	${ await prefixCSS(fs.readFileSync(path, 'utf-8')) }
 </style>
 `
 
-export const inlineSASS = (path: string) => {
+export const inlineSASS = async (path: string) => {
 	if (scriptCache.has(path)) {
 		return scriptCache.get(path)
 	}
 
-	const compiledCSS = sass.renderSync({ file: path }).css.toString()
+	const compiledCSS = await prefixCSS(sass.renderSync({ file: path }).css.toString())
 	scriptCache.set(path, compiledCSS)
 
 	return /* html */ `

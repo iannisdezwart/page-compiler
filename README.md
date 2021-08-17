@@ -141,6 +141,7 @@ You can use the font in CSS/SASS files:
 
 JS, CSS and SASS scripts can be directly inlined within the HTML pages of your webapp.
 This reduces the request count and server load.
+CSS and SASS scripts are auto-prefixed.
 
 Example:
 
@@ -148,8 +149,8 @@ Example:
 import { inlineJS, inlineSASS, inlineExternalJS, inlineExternalCSS } from 'page-compiler'
 
 /* html */ `
-${ inlineJS('src/js/contact-page.js') }
-${ inlineSASS('src/sass/contact-page.sass') }
+${ await inlineJS('src/js/contact-page.js') }
+${ await inlineSASS('src/sass/contact-page.sass') }
 
 ${ await inlineExternalJS('https://some-cdn.com/some-contact-form-library.js') }
 ${ await inlineExternalCSS('https://some-cdn.com/some-contact-form-library.css') }
