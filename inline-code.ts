@@ -11,15 +11,23 @@ const scriptCache = new LRU<string, string>({
 })
 
 const prefixCSS = (css: string) => new Promise<string>(resolve => {
-	postcss([ autoprefixer ]).process(css).then(result => {
-		const warnings = result.warnings()
+	const browsersList = fs.existsSync('.browserslistrc')
+		? fs.readFileSync('.browserslistrc', 'utf-8').split('\n')
+		: [ '> 0.01%' ]
 
-		for (const warning of warnings) {
-			console.error(warning)
-		}
+	postcss([ autoprefixer({ overrideBrowserslist: browsersList }) ])
+		.process(css, {
+			from: null
+		})
+		.then(result => {
+			const warnings = result.warnings()
 
-		resolve(result.css)
-	})
+			for (const warning of warnings) {
+				console.error(warning)
+			}
+
+			resolve(result.css)
+		})
 })
 
 export const inlineJS = async (path: string) => /* html */ `
