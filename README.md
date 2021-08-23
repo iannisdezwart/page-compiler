@@ -141,7 +141,7 @@ You can use the font in CSS/SASS files:
 
 JS, CSS and SASS scripts can be directly inlined within the HTML pages of your webapp.
 This reduces the request count and server load.
-CSS and SASS scripts are auto-prefixed.
+CSS and SASS scripts are auto-prefixed, and can be controlled by a `.browserslistrc` file.
 
 Example:
 
