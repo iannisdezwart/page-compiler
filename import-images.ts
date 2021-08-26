@@ -203,7 +203,7 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 					'removeHiddenElems',
 					'removeEmptyText',
 					'removeEmptyContainers',
-					'removeViewBox',
+					// 'removeViewBox',
 					'cleanupEnableBackground',
 					'minifyStyles',
 					'convertStyleToAttrs',
