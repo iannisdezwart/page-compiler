@@ -3,6 +3,7 @@ import { resolve as resolvePath } from 'path'
 import * as chalk from 'chalk'
 import * as graphicsMagick from 'gm'
 import imageSize from 'image-size'
+import { CustomPlugin, optimize as optimiseSVG } from 'svgo'
 import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
 import { FilePath } from './util'
 
@@ -180,7 +181,55 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 	}
 
 	const svgFile = fs.readFileSync(path, 'utf-8')
-	const svg = parseXML(svgFile)
+	const svg = parseXML(
+		optimiseSVG(
+			svgFile,
+			{
+				multipass: true,
+				path: `./${ path }`,
+				plugins: [
+					'cleanupAttrs',
+					'mergeStyles',
+					'inlineStyles',
+					'removeDoctype',
+					'removeXMLProcInst',
+					'removeComments',
+					'removeMetadata',
+					'removeTitle',
+					'removeDesc',
+					'removeUselessDefs',
+					'removeXMLNS',
+					'removeEmptyAttrs',
+					'removeHiddenElems',
+					'removeEmptyText',
+					'removeEmptyContainers',
+					'removeViewBox',
+					'cleanupEnableBackground',
+					'minifyStyles',
+					'convertStyleToAttrs',
+					'convertColors',
+					'convertPathData',
+					'convertTransform',
+					'removeUnknownsAndDefaults',
+					'removeNonInheritableGroupAttrs',
+					'removeUselessStrokeAndFill',
+					'removeUnusedNS',
+					'prefixIds',
+					// 'cleanupIDs',
+					'cleanupNumericValues',
+					// 'cleanupListOfValues',
+					'moveElemsAttrsToGroup',
+					'moveGroupAttrsToElems',
+					'collapseGroups',
+					'mergePaths',
+					'convertShapeToPath',
+					'convertEllipseToCircle',
+					'sortAttrs',
+					'sortDefsChildren',
+				]
+			}
+		).data
+	)
 
 	if (options.id != null) {
 		svg.attributes.set('id', options.id)
@@ -192,7 +241,9 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 
 	svg.children.unshift(new XMLNode('title', {}, [ options.alt ]))
 
-	return buildXML(svg, { indentationSize: 0, seperator: '' })
+	return buildXML(svg, {
+		indentationSize: 0, seperator: ''
+	})
 }
 
 export const inlineSVGBackgroundImage = (path: string) => {
