@@ -5,6 +5,7 @@ import imageSize from 'image-size'
 import { optimize as optimiseSVG } from 'svgo'
 import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
 import { FilePath, log } from './util'
+import { createHash } from 'crypto'
 
 const standardImageDimensions = [
 	640, 960, 1280, 1920, 2560, 3840
@@ -182,9 +183,16 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 		...options
 	}
 
+	const svgFile = fs.readFileSync(path, 'utf-8')
+	const hash = createHash('md5').update(svgFile).digest('hex')
+
+	if (fs.existsSync(`cache/svg/${ hash }.svg`)) {
+		log('debug', `Inlined cached SVG: ${ chalk.yellow(path) }`)
+		return fs.readFileSync(`cache/svg/${ hash }.svg`, 'utf-8')
+	}
+
 	log('debug', `Inlining SVG: ${ chalk.yellow(path) }`)
 
-	const svgFile = fs.readFileSync(path, 'utf-8')
 	const svg = parseXML(
 		optimiseSVG(
 			svgFile,
@@ -245,9 +253,21 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 
 	svg.children.unshift(new XMLNode('title', {}, [ options.alt ]))
 
-	return buildXML(svg, {
-		indentationSize: 0, seperator: ''
+	const svgString = buildXML(svg, {
+		indentationSize: 0,
+		seperator: ''
 	})
+
+	const cachedFilename = `cache/svg/${ hash }.svg`
+
+	if (!fs.existsSync('cache/svg')) {
+		fs.mkdirSync('cache/svg', { recursive: true })
+		log('info', `Created directory: ${ chalk.yellow('cache/svg') }`)
+	}
+
+	fs.writeFileSync(cachedFilename, svgString)
+
+	return svgString
 }
 
 export const inlineSVGBackgroundImage = (path: string) => {
