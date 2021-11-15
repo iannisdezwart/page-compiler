@@ -1,6 +1,7 @@
 import * as fs from 'fs'
-import { FilePath } from './util'
+import { FilePath, log } from './util'
 import { resolve as resolvePath } from 'path'
+import * as chalk from 'chalk'
 
 export const includeResource = (srcPath: string) => {
 	const path = new FilePath(srcPath)
@@ -8,9 +9,11 @@ export const includeResource = (srcPath: string) => {
 
 	if (!fs.existsSync('root/res')) {
 		fs.mkdirSync('root/res', { recursive: true })
+		log('debug', `Created directory: ${ chalk.yellow('root/res') }`)
 	}
 
 	if (!fs.existsSync(destPath)) {
 		fs.symlinkSync(resolvePath(srcPath), destPath)
+		log('debug', `Created symlink for resource: ${ chalk.yellow(srcPath) }`)
 	}
 }

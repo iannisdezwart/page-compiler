@@ -1,5 +1,7 @@
 import { inlineExternalCSS } from './inline-code'
 import * as LRU from 'lru-cache'
+import * as chalk from 'chalk'
+import { log } from './util'
 
 const fontCache = new LRU<string, string>({
 	max: 100 * 1024 * 1024, // 100 MB
@@ -23,6 +25,8 @@ export const importGoogleFont = async (
 	styles: FontStyle[],
 	charSets: CharacterSet[] = null
 ) => {
+	log('debug', `Importing Google Font: ${ chalk.yellow(fontFamily) }`)
+
 	const stylesString = styles
 		.sort((a, b) => {
 			if (a.italic && !b.italic) return 1
@@ -46,7 +50,12 @@ export const importGoogleFont = async (
 		url += `&text=${ encodeURIComponent(text) }`
 	}
 
-	if (fontCache.has(url)) return fontCache.get(url)
+	if (fontCache.has(url)) {
+		log('debug', `Using cached font: ${ chalk.yellow(url) }`)
+		return fontCache.get(url)
+	}
+
+	log('debug', `Downloading font: ${ chalk.yellow(url) }`)
 
 	const css = /* html */ `
 	<link rel="preconnect" href="https://fonts.gstatic.com">

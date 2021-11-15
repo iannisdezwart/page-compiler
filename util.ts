@@ -2,6 +2,38 @@ import * as fs from 'fs'
 import { resolve as resolvePath } from 'path'
 import * as graphicsMagick from 'gm'
 import * as chalk from 'chalk'
+import { debug } from './exported-util'
+
+type LogLevel = 'debug' | 'info' | 'err'
+
+const logPrefixMap = new Map<LogLevel, string>([
+	[ 'debug', chalk.blue('i') ],
+	[ 'info', chalk.green('✔') ],
+	[ 'err', chalk.yellow('✗') ],
+])
+
+export const log = (level: LogLevel, ...args: any[]) => {
+	const now = Date.now()
+
+	const YYYY = new Date(now).getFullYear().toString()
+	const MM = (new Date(now).getMonth() + 1).toString().padStart(2, '0')
+	const DD = new Date(now).getDate().toString().padStart(2, '0')
+
+	const hh = new Date(now).getHours().toString().padStart(2, '0')
+	const mm = new Date(now).getMinutes().toString().padStart(2, '0')
+	const ss = new Date(now).getSeconds().toString().padStart(2, '0')
+	const ms = new Date(now).getMilliseconds().toString().padStart(3, '0')
+
+	const date = `${ YYYY }-${ MM }-${ DD }`
+	const time = `${ hh }:${ mm }:${ ss }.${ ms }`
+	const dateTime = `${ date } ${ time }`
+
+	if (level == 'debug' && !debug) {
+		return
+	}
+
+	console.log(`${ logPrefixMap.get(level) } ${ chalk.grey(dateTime) }`, ...args)
+}
 
 export class FilePath {
 	directory: string
@@ -45,7 +77,7 @@ export const deleteEmptyDirectories = (dirPath: string) => {
 		// This directory is empty, delete it
 
 		fs.rmdirSync(dirPath)
-		console.log(`${ chalk.green('✔') } Deleted empty directory: ${ chalk.red(resolvePath(dirPath)) }`)
+		log('info', `Deleted empty directory: ${ chalk.yellow(dirPath) }`)
 	} else {
 		// Recursively call deleteEmptyDirectories on any subdirectory
 
@@ -87,13 +119,9 @@ export const scaleImages = (
 	const filePath = new FilePath(inputPath)
 	let finishedImages = 0
 
-	const finish = () => {
-		resolve()
-	}
-
 	const increment = () => {
 		finishedImages++
-		if (finishedImages == dimensions.length) finish()
+		if (finishedImages == dimensions.length) resolve()
 	}
 
 	const imageWriteCallback = (path: string) => (err: Error) => {
@@ -102,8 +130,7 @@ export const scaleImages = (
 			throw err
 		}
 
-		console.log(`${ chalk.green('✔') } Processed image: ${ chalk.yellow(resolvePath(path)) }`)
-
+		log('info', `Processed image: ${ chalk.yellow(path) }`)
 		increment()
 	}
 

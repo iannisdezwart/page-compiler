@@ -1,11 +1,10 @@
 import * as fs from 'fs'
-import { resolve as resolvePath } from 'path'
 import * as chalk from 'chalk'
 import * as graphicsMagick from 'gm'
 import imageSize from 'image-size'
-import { CustomPlugin, optimize as optimiseSVG } from 'svgo'
+import { optimize as optimiseSVG } from 'svgo'
 import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
-import { FilePath } from './util'
+import { FilePath, log } from './util'
 
 const standardImageDimensions = [
 	640, 960, 1280, 1920, 2560, 3840
@@ -35,6 +34,8 @@ export const importJPG = (
 	path: string,
 	options: ImportImageOptions
 ) => new Promise<string>(resolve => {
+	log('debug', `Importing JPG: ${ chalk.yellow(path) }`)
+
 	// Get width, height & aspect ratio of image
 
 	const { width, height } = imageSize(fs.readFileSync(path))
@@ -70,7 +71,7 @@ export const importJPG = (
 
 	if (!fs.existsSync(outputDirectory)) {
 		fs.mkdirSync(outputDirectory, { recursive: true })
-		console.log(`${ chalk.green('✔') } Created directory: ${ chalk.yellow(outputDirectory) }`)
+		log('info', `Created directory: ${ chalk.yellow(outputDirectory) }`)
 	}
 
 	// Called when all images have been processed
@@ -130,6 +131,7 @@ export const importJPG = (
 	}
 
 	if (imagesAlreadyProcessed) {
+		log('debug', `Images already processed: ${ chalk.yellow(path) }`)
 		finish()
 		return
 	}
@@ -156,7 +158,7 @@ export const importJPG = (
 					throw err
 				}
 
-				console.log(`${ chalk.green('✔') } Processed image: ${ chalk.yellow(resolvePath(path)) }`)
+				log('info', `Processed image: ${ chalk.yellow(path) }`)
 
 				finishedImages++
 				if (finishedImages == imageDimensions.length * 2) finish()
@@ -179,6 +181,8 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 		classes: [],
 		...options
 	}
+
+	log('debug', `Inlining SVG: ${ chalk.yellow(path) }`)
 
 	const svgFile = fs.readFileSync(path, 'utf-8')
 	const svg = parseXML(

@@ -4,6 +4,8 @@ import * as LRU from 'lru-cache'
 import * as sass from 'sass'
 import * as autoprefixer from 'autoprefixer'
 import postcss from 'postcss'
+import * as chalk from 'chalk'
+import { log } from './util'
 
 const scriptCache = new LRU<string, string>({
 	max: 100 * 1024 * 1024, // 100 MB
@@ -11,6 +13,8 @@ const scriptCache = new LRU<string, string>({
 })
 
 const prefixCSS = (css: string) => new Promise<string>(resolve => {
+	log('debug', `Prefixing CSS`)
+
 	const browsersList = fs.existsSync('.browserslistrc')
 		? fs.readFileSync('.browserslistrc', 'utf-8').split('\n')
 		: [ '> 0.01%' ]
@@ -47,6 +51,8 @@ export const inlineSASS = async (path: string) => {
 		return scriptCache.get(path)
 	}
 
+	log('debug', `Compiling SASS: ${ chalk.yellow(path) }`)
+
 	const compiledCSS = await prefixCSS(sass.renderSync({ file: path }).css.toString())
 	scriptCache.set(path, compiledCSS)
 
@@ -59,9 +65,12 @@ export const inlineSASS = async (path: string) => {
 
 export const inlineExternalJS = (url: string) => new Promise<string>(resolve => {
 	if (scriptCache.has(url)) {
+		log('debug', `Using cached JS: ${ chalk.yellow(url) }`)
 		resolve(scriptCache.get(url))
 		return
 	}
+
+	log('debug', `Downloading JS: ${ chalk.yellow(url) }`)
 
 	let html = '<script>'
 
@@ -80,10 +89,13 @@ export const inlineExternalJS = (url: string) => new Promise<string>(resolve => 
 
 export const inlineExternalCSS = (url: string) => new Promise<string>(resolve => {
 	if (scriptCache.has(url)) {
+		log('debug', `Using cached CSS: ${ chalk.yellow(url) }`)
 		resolve(scriptCache.get(url))
 		return
 	}
 
+	log('debug', `Downloading CSS: ${ chalk.yellow(url) }`)
+ 
 	let html = '<style>'
 
 	https.get(url, res => {

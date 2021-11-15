@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { scaleImages } from './util'
+import { log, scaleImages } from './util'
 import imageSize from 'image-size'
 import { PageShell } from './page-shell'
 
@@ -51,6 +51,8 @@ interface PWAManifest {
 }
 
 export const createPWAManifest = async (manifest: PWAManifest, page: PageShell) => {
+	log('debug', `Creating PWA Manifest`)
+
 	const json = {}
 
 	if (manifest.backgroundColour != null) {

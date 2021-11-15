@@ -3,6 +3,7 @@ import { resolve as resolvePath } from 'path'
 import { db } from 'node-json-database'
 import * as chalk from 'chalk'
 import { deleteEmptyDirectories, dotDotSlashAttack, FilePath } from './util'
+import { log } from './util'
 
 interface Page {
 	html: string
@@ -18,10 +19,13 @@ export const compilePages = (pages: Page[]) => {
 
 	const start = Date.now()
 
+	log('debug', 'Started compilation')
+
 	// Write the ./root directory if it does not exist
 
 	if (!fs.existsSync('root')) {
 		fs.mkdirSync('root')
+		log('info', `Created directory: ${ chalk.yellow('root') }`)
 	}
 
 	const pagesDB = db('pages.json')
@@ -45,6 +49,8 @@ export const compilePages = (pages: Page[]) => {
 				constraints: [ 'primaryKey' ]
 			}
 		])
+
+		log('info', `Created table: ${ chalk.yellow('compiled_pages') }`)
 	}
 
 	// Get tables
@@ -66,7 +72,7 @@ export const compilePages = (pages: Page[]) => {
 
 		if (!fs.existsSync(filePath.directory)) {
 			fs.mkdirSync(filePath.directory, { recursive: true })
-			console.log(`${ chalk.green('✔') } Created directory: ${ chalk.yellow(filePath.directory) }`)
+			log('info', `Created directory: ${ chalk.yellow(filePath.directory) }`)
 		}
 
 		// Security
@@ -78,7 +84,7 @@ export const compilePages = (pages: Page[]) => {
 		// Write the file
 
 		fs.writeFileSync('./root' + page.path, page.html)
-		console.log(`${ chalk.green('✔') } Wrote file: ${ chalk.yellow(resolvePath('./root' + page.path)) }`)
+		log('info', `Wrote file: ${ chalk.yellow('./root' + page.path) }`)
 
 		// Remove the file from pagesToRemove
 
@@ -114,7 +120,7 @@ export const compilePages = (pages: Page[]) => {
 
 			fs.unlinkSync(pagePath)
 
-			console.log(`${ chalk.green('✔') } Deleted unnecessary file: ${ chalk.red(resolvePath(pagePath)) }`)
+			log('info', `Deleted file: ${ chalk.yellow(pagePath) }`)
 		}
 
 		// Delete path from compiled_pages table
@@ -124,5 +130,5 @@ export const compilePages = (pages: Page[]) => {
 
 	deleteEmptyDirectories('./root')
 
-	console.log(`${ chalk.green('✔') } Finished compilation in ${ Date.now() - start }ms`)
+	log('info', `Finished compilation in ${ chalk.yellow(Date.now() - start) }ms`)
 }
