@@ -37,7 +37,7 @@ const prefixCSS = (css: string) => new Promise<string>(resolve => {
 
 	if (autoprefixer == null) {
 		log('debug', 'Loading autoprefixer...')
-		autoprefixer = require('autoprefixer')({ browsers: browsersList })
+		autoprefixer = require('autoprefixer')
 	}
 
 	if (postcss == null) {
