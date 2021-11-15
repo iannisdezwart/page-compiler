@@ -187,7 +187,7 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 	const hash = createHash('md5').update(svgFile).digest('hex')
 
 	if (fs.existsSync(`cache/svg/${ hash }.svg`)) {
-		log('debug', `Inlined cached SVG: ${ chalk.yellow(path) }`)
+		log('debug', `Inlined cached SVG for ${ chalk.yellow(path) }`)
 		return fs.readFileSync(`cache/svg/${ hash }.svg`, 'utf-8')
 	}
 
@@ -262,7 +262,7 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 
 	if (!fs.existsSync('cache/svg')) {
 		fs.mkdirSync('cache/svg', { recursive: true })
-		log('info', `Created directory: ${ chalk.yellow('cache/svg') }`)
+		log('debug', `Created directory: ${ chalk.yellow('cache/svg') }`)
 	}
 
 	fs.writeFileSync(cachedFilename, svgString)

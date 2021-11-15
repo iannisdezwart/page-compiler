@@ -1,12 +1,8 @@
 import { inlineExternalCSS } from './inline-code'
-import * as LRU from 'lru-cache'
+import * as fs from 'fs'
 import * as chalk from 'chalk'
 import { log } from './util'
-
-const fontCache = new LRU<string, string>({
-	max: 100 * 1024 * 1024, // 100 MB
-	length: value => value.length
-})
+import { createHash } from 'crypto'
 
 interface FontStyle {
 	weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
@@ -25,8 +21,6 @@ export const importGoogleFont = async (
 	styles: FontStyle[],
 	charSets: CharacterSet[] = null
 ) => {
-	log('debug', `Importing Google Font: ${ chalk.yellow(fontFamily) }`)
-
 	const stylesString = styles
 		.sort((a, b) => {
 			if (a.italic && !b.italic) return 1
@@ -35,6 +29,15 @@ export const importGoogleFont = async (
 		})
 		.map(style => `${ style.italic ? 1 : 0 },${ style.weight }`)
 		.join(';')
+
+	const hash = createHash('md5').update(fontFamily + stylesString).digest('hex')
+
+	if (fs.existsSync(`cache/fonts/${ hash }.css`)) {
+		log('debug', `Imported cached Google Font: ${ chalk.yellow(fontFamily) }`)
+		return fs.readFileSync(`cache/fonts/${ hash }.css`, 'utf8')
+	}
+
+	log('debug', `Importing Google Font: ${ chalk.yellow(fontFamily) }`)
 
 	let url = `https://fonts.googleapis.com/css2?family=${ fontFamily }:ital,wght@${ stylesString }&display=swap`
 
@@ -50,11 +53,6 @@ export const importGoogleFont = async (
 		url += `&text=${ encodeURIComponent(text) }`
 	}
 
-	if (fontCache.has(url)) {
-		log('debug', `Using cached font: ${ chalk.yellow(url) }`)
-		return fontCache.get(url)
-	}
-
 	log('debug', `Downloading font: ${ chalk.yellow(url) }`)
 
 	const css = /* html */ `
@@ -62,6 +60,14 @@ export const importGoogleFont = async (
 	${ await inlineExternalCSS(url) }
 	`
 
-	fontCache.set(url, css)
+	const cachedFilename = `cache/fonts/${ hash }.css`
+
+	if (!fs.existsSync('cache/fonts')) {
+		fs.mkdirSync('cache/fonts', { recursive: true })
+		log('debug', `Created cache directory: ${ chalk.yellow('cache/fonts') }`)
+	}
+
+	fs.writeFileSync(cachedFilename, css)
+
 	return css
 }
