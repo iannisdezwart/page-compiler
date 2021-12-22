@@ -5,7 +5,7 @@ PageCompiler does what you might expect: it compiles pages.
 With it, you can dynamically create static websites.
 PageCompiler's main purpose is performance: the compiled pages are supposed to be as fast as possible.
 You can expect near 100% Google Lighthouse scores on well formed pages, even with images.
-The most powerful thing of PageCompiler is the ability to interpolate JavaScript/TypeScript in your HTML files.
+The most powerful feature of PageCompiler is the ability to interpolate JavaScript/TypeScript in your HTML files.
 This code will be executed at compile time.
 PageCompiler's built-in tools take advantage of this.
 
@@ -96,7 +96,7 @@ import { inlineSVG } from 'page-compiler'
 
 /* html */ `
 <div id="my-app">
-	${ inlineSVG('src/img/twitter-icon.svg', { class: 'social-icon' }) }
+	${ inlineSVG('src/img/twitter-icon.svg', { classes: [ 'social-icon' ] }) }
 </div>
 `
 ```
