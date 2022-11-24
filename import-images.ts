@@ -31,10 +31,43 @@ interface ImportImageOptions {
 
 const imageMagick = graphicsMagick.subClass({ imageMagick: true })
 
+const compressImage = (
+	path: string,
+	outputPath: string,
+	dimension: number,
+	aspectRatio: number,
+	options: ImportImageOptions,
+) => new Promise<void>(resolve => {
+	const imageState = imageMagick(path)
+		.resize(dimension, dimension / aspectRatio, '>')
+		.quality(options.quality)
+		.strip()
+		.interlace('Plane')
+		.colorspace('RGB')
+		.samplingFactor(4, 2)
+
+	let finishedImages = 0
+
+	const imageWriteCallback = (path: string) => (err: Error) => {
+		if (err != null) {
+			console.error('error while converting image:', err)
+			throw err
+		}
+
+		log('info', `Processed image: ${ chalk.yellow(path) }`)
+
+		finishedImages++
+		if (finishedImages == 2) resolve()
+	}
+
+	imageState.write(outputPath + '.webp', imageWriteCallback(outputPath + '.webp'))
+	imageState.write(outputPath + '.jpg', imageWriteCallback(outputPath + '.jpg'))
+})
+
 export const importJPG = (
 	path: string,
 	options: ImportImageOptions
-) => new Promise<string>(resolve => {
+) => new Promise<string>(async resolve => {
 	log('debug', `Importing JPG: ${ chalk.yellow(path) }`)
 
 	// Get width, height & aspect ratio of image
@@ -66,7 +99,6 @@ export const importJPG = (
 	const inputFilePath = new FilePath(path)
 	const outputFilename = `${ inputFilePath.filename }-${ options.widthRatio }`
 	const outputDirectory = `root/res/${ inputFilePath.directory }`
-	let finishedImages = 0
 
 	// Create output directory, if needed
 
@@ -142,32 +174,12 @@ export const importJPG = (
 	for (let i = 0; i < imageDimensions.length; i++) {
 		const dimension = imageDimensions[i]
 		const standardDimension = standardImageDimensions[i]
-
 		const outputPath = `${ outputDirectory }/${ outputFilename }-${ standardDimension }`
 
-		const imageState = imageMagick(path)
-			.resize(dimension, dimension / aspectRatio, '>')
-			.quality(options.quality)
-			.strip()
-			.interlace('Plane')
-			.colorspace('RGB')
-			.samplingFactor(4, 2)
-
-			const imageWriteCallback = (path: string) => (err: Error) => {
-				if (err != null) {
-					console.error('error while converting image:', err)
-					throw err
-				}
-
-				log('info', `Processed image: ${ chalk.yellow(path) }`)
-
-				finishedImages++
-				if (finishedImages == imageDimensions.length * 2) finish()
-			}
-
-			imageState.write(outputPath + '.webp', imageWriteCallback(outputPath + '.webp'))
-			imageState.write(outputPath + '.jpg', imageWriteCallback(outputPath + '.jpg'))
+		await compressImage(path, outputPath, dimension, aspectRatio, options)
 	}
+
+	finish()
 })
 
 interface ImportSVGOptions {
