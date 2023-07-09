@@ -1,10 +1,10 @@
+import chalk from 'chalk'
+import { createHash } from 'crypto'
 import * as fs from 'fs'
 import * as https from 'https'
-import * as LRU from 'lru-cache'
+import LRU from 'lru-cache'
 import * as sass from 'sass'
-import * as chalk from 'chalk'
 import { log } from './util'
-import { createHash } from 'crypto'
 
 // Lazy load autoprefixer and postcss, because it takes incredibly long to load
 // I'm talking about ~2 seconds on my machine
@@ -141,7 +141,7 @@ export const inlineExternalCSS = (url: string) => new Promise<string>(resolve =>
 	}
 
 	log('debug', `Downloading CSS: ${ chalk.yellow(url) }`)
- 
+
 	let html = '<style>'
 
 	https.get(url, res => {

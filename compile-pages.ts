@@ -1,9 +1,8 @@
+import chalk from 'chalk'
 import * as fs from 'fs'
-import { resolve as resolvePath } from 'path'
 import { db } from 'node-json-database'
-import * as chalk from 'chalk'
-import { deleteEmptyDirectories, dotDotSlashAttack, FilePath } from './util'
-import { log } from './util'
+import { resolve as resolvePath } from 'path'
+import { deleteEmptyDirectories, dotDotSlashAttack, FilePath, log } from './util'
 
 interface Page {
 	html: string

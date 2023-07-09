@@ -1,8 +1,8 @@
-import { inlineExternalCSS } from './inline-code'
-import * as fs from 'fs'
-import * as chalk from 'chalk'
-import { log } from './util'
+import chalk from 'chalk'
 import { createHash } from 'crypto'
+import * as fs from 'fs'
+import { inlineExternalCSS } from './inline-code'
+import { log } from './util'
 
 interface FontStyle {
 	weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900

@@ -1,11 +1,11 @@
+import chalk from 'chalk'
+import { createHash } from 'crypto'
 import * as fs from 'fs'
-import * as chalk from 'chalk'
 import * as graphicsMagick from 'gm'
 import imageSize from 'image-size'
-import { optimize as optimiseSVG } from 'svgo'
-import { parseXML, buildXML, XMLNode } from 'node-xml-parser'
+import { XMLNode, buildXML, parseXML } from 'node-xml-parser'
+import { OptimizedSvg, optimize as optimiseSVG } from 'svgo'
 import { FilePath, log } from './util'
-import { createHash } from 'crypto'
 
 const standardImageDimensions = [
 	640, 960, 1280, 1920, 2560, 3840
@@ -205,55 +205,59 @@ export const inlineSVG = (path: string, options: ImportSVGOptions = {}) => {
 
 	log('debug', `Inlining SVG: ${ chalk.yellow(path) }`)
 
-	const svg = parseXML(
-		optimiseSVG(
-			svgFile,
-			{
-				multipass: true,
-				path: `./${ path }`,
-				plugins: [
-					'cleanupAttrs',
-					'mergeStyles',
-					'inlineStyles',
-					'removeDoctype',
-					'removeXMLProcInst',
-					'removeComments',
-					'removeMetadata',
-					'removeTitle',
-					'removeDesc',
-					'removeUselessDefs',
-					'removeXMLNS',
-					'removeEmptyAttrs',
-					'removeHiddenElems',
-					'removeEmptyText',
-					'removeEmptyContainers',
-					// 'removeViewBox',
-					'cleanupEnableBackground',
-					'minifyStyles',
-					'convertStyleToAttrs',
-					'convertColors',
-					'convertPathData',
-					'convertTransform',
-					'removeUnknownsAndDefaults',
-					'removeNonInheritableGroupAttrs',
-					'removeUselessStrokeAndFill',
-					'removeUnusedNS',
-					'prefixIds',
-					// 'cleanupIDs',
-					'cleanupNumericValues',
-					// 'cleanupListOfValues',
-					'moveElemsAttrsToGroup',
-					'moveGroupAttrsToElems',
-					'collapseGroups',
-					'mergePaths',
-					'convertShapeToPath',
-					'convertEllipseToCircle',
-					'sortAttrs',
-					'sortDefsChildren',
-				]
-			}
-		).data
+	const optimisedSVG = optimiseSVG(
+		svgFile,
+		{
+			multipass: true,
+			path: `./${ path }`,
+			plugins: [
+				'cleanupAttrs',
+				'mergeStyles',
+				'inlineStyles',
+				'removeDoctype',
+				'removeXMLProcInst',
+				'removeComments',
+				'removeMetadata',
+				'removeTitle',
+				'removeDesc',
+				'removeUselessDefs',
+				'removeXMLNS',
+				'removeEmptyAttrs',
+				'removeHiddenElems',
+				'removeEmptyText',
+				'removeEmptyContainers',
+				// 'removeViewBox',
+				'cleanupEnableBackground',
+				'minifyStyles',
+				'convertStyleToAttrs',
+				'convertColors',
+				'convertPathData',
+				'convertTransform',
+				'removeUnknownsAndDefaults',
+				'removeNonInheritableGroupAttrs',
+				'removeUselessStrokeAndFill',
+				'removeUnusedNS',
+				'prefixIds',
+				// 'cleanupIDs',
+				'cleanupNumericValues',
+				// 'cleanupListOfValues',
+				'moveElemsAttrsToGroup',
+				'moveGroupAttrsToElems',
+				'collapseGroups',
+				'mergePaths',
+				'convertShapeToPath',
+				'convertEllipseToCircle',
+				'sortAttrs',
+				'sortDefsChildren',
+			]
+		}
 	)
+
+	if (optimisedSVG.error != null) {
+		throw 'Error inlining SVG: ' + optimisedSVG.error
+	}
+
+	const svg = parseXML((optimisedSVG as OptimizedSvg).data)
 
 	if (options.id != null) {
 		svg.attributes.set('id', options.id)

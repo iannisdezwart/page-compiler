@@ -1,7 +1,7 @@
+import chalk from 'chalk'
 import * as fs from 'fs'
-import { resolve as resolvePath } from 'path'
 import * as graphicsMagick from 'gm'
-import * as chalk from 'chalk'
+import { resolve as resolvePath } from 'path'
 import { debug } from './exported-util'
 
 type LogLevel = 'debug' | 'info' | 'err'

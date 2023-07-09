@@ -1,7 +1,7 @@
+import chalk from 'chalk'
 import * as fs from 'fs'
-import { FilePath, log } from './util'
 import { resolve as resolvePath } from 'path'
-import * as chalk from 'chalk'
+import { FilePath, log } from './util'
 
 export const includeResource = (srcPath: string) => {
 	const path = new FilePath(srcPath)
