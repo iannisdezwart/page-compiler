@@ -13,7 +13,21 @@ interface CompiledPages {
 	path: string
 }
 
-export const compilePages = (pages: Page[]) => {
+const pageCache = new Map<string, any>()
+
+export const pageCacheGet = (key: string) => {
+	return pageCache.get(key)
+}
+
+export const pageCacheSet = (key: string, value: any) => {
+	pageCache.set(key, value)
+}
+
+export const pageCacheHas = (key: string) => {
+	return pageCache.has(key)
+}
+
+export const compilePages = async (pageCompileFns: (() => Promise<Page>)[]) => {
 	// Store start time
 
 	const start = Date.now()
@@ -64,7 +78,10 @@ export const compilePages = (pages: Page[]) => {
 
 	// Compile all pages
 
-	for (const page of pages) {
+	for (const pageCompileFn of pageCompileFns) {
+		pageCache.clear()
+		const page = await pageCompileFn()
+
 		// Create directory, if needed
 
 		const filePath = new FilePath('./root' + page.path)

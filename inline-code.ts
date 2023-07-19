@@ -3,7 +3,9 @@ import { createHash } from 'crypto'
 import * as fs from 'fs'
 import * as https from 'https'
 import LRU from 'lru-cache'
+import { resolve as resolvePath } from 'path'
 import * as sass from 'sass'
+import { pageCacheHas, pageCacheSet } from './compile-pages'
 import { log } from './util'
 
 // Lazy load autoprefixer and postcss, because it takes incredibly long to load
@@ -72,11 +74,35 @@ export const inlineJS = async (path: string) => /* html */ `
 </script>
 `
 
+export const inlineJSOnce = async (path: string) => {
+	const key = `js-${ resolvePath(path) }`
+
+	if (pageCacheHas(key)) {
+		log('debug', `Skipping already inlined JS: ${ chalk.yellow(path) }`)
+		return ''
+	}
+
+	pageCacheSet(key, true)
+	return await inlineJS(path)
+}
+
 export const inlineCSS = async (path: string) => /* html */ `
 <style>
 	${ await prefixCSS(fs.readFileSync(path, 'utf-8')) }
 </style>
 `
+
+export const inlineCSSOnce = async (path: string) => {
+	const key = `css-${ resolvePath(path) }`
+
+	if (pageCacheHas(key)) {
+		log('debug', `Skipping already inlined CSS: ${ chalk.yellow(path) }`)
+		return ''
+	}
+
+	pageCacheSet(key, true)
+	return await inlineCSS(path)
+}
 
 export const inlineSASS = async (path: string) => {
 	const file = fs.readFileSync(path, 'utf-8')
@@ -109,6 +135,18 @@ export const inlineSASS = async (path: string) => {
 	`
 }
 
+export const inlineSASSOnce = async (path: string) => {
+	const key = `sass-${ resolvePath(path) }`
+
+	if (pageCacheHas(key)) {
+		log('debug', `Skipping already inlined SASS: ${ chalk.yellow(path) }`)
+		return ''
+	}
+
+	pageCacheSet(key, true)
+	return await inlineSASS(path)
+}
+
 export const inlineExternalJS = (url: string) => new Promise<string>(resolve => {
 	if (scriptCache.has(url)) {
 		log('debug', `Using cached JS: ${ chalk.yellow(url) }`)
@@ -133,6 +171,18 @@ export const inlineExternalJS = (url: string) => new Promise<string>(resolve => 
 	})
 })
 
+export const inlineExternalJSOnce = async (url: string) => {
+	const key = `ext-js-${ url }`
+
+	if (pageCacheHas(key)) {
+		log('debug', `Skipping already inlined external JS: ${ chalk.yellow(url) }`)
+		return ''
+	}
+
+	pageCacheSet(key, true)
+	return await inlineExternalJS(url)
+}
+
 export const inlineExternalCSS = (url: string) => new Promise<string>(resolve => {
 	if (scriptCache.has(url)) {
 		log('debug', `Using cached CSS: ${ chalk.yellow(url) }`)
@@ -156,3 +206,15 @@ export const inlineExternalCSS = (url: string) => new Promise<string>(resolve =>
 		})
 	})
 })
+
+export const inlineExternalCSSOnce = async (url: string) => {
+	const key = `ext-css-${ url }`
+
+	if (pageCacheHas(key)) {
+		log('debug', `Skipping already inlined external CSS: ${ chalk.yellow(url) }`)
+		return ''
+	}
+
+	pageCacheSet(key, true)
+	return await inlineExternalCSS(url)
+}
