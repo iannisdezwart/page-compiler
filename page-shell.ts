@@ -33,10 +33,10 @@ export class PageShell {
 		return this.options.tail == null ? '' : this.options.tail
 	}
 
-	render(title: string, body: string, seo: SEO) {
+	render(title: string, body: string, seo: SEO, lang: string = "en") {
 		return /* html */ `
 		<!DOCTYPE html>
-		<html lang="en" dir="ltr">
+		<html lang="${lang}" dir="ltr">
 			<head>
 				<meta charset="utf-8">
 				<meta name="description" content="${ seo.description }">
