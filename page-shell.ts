@@ -40,7 +40,7 @@ export class PageShell {
 
 	async render(title: string, body: string, seo: SEO, lang: string = "en") {
 		const imagePathHash = createHash('md5').update(seo.image).digest('hex')
-		const squareSeoImagePath = `root/res/seo/${ imagePathHash }.jpg`
+		const squareSeoImagePath = `root/res/seo/${ imagePathHash }`
 		const squareSeoImage = await compressImage(
 			seo.image,
 			squareSeoImagePath,
@@ -52,7 +52,7 @@ export class PageShell {
 				extensions: [ 'jpg' ]
 			}
 		)
-		const wideSeoImagePath = `root/res/seo/${ imagePathHash }-wide.jpg`
+		const wideSeoImagePath = `root/res/seo/${ imagePathHash }-wide`
 		const wideSeoImage = await compressImage(
 			seo.image,
 			wideSeoImagePath,
