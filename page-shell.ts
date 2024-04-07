@@ -1,4 +1,5 @@
 import { createHash } from 'crypto'
+import { existsSync, mkdirSync } from 'fs'
 import { compressImage } from './import-images'
 
 export interface SEO {
@@ -39,31 +40,36 @@ export class PageShell {
 	}
 
 	async render(title: string, body: string, seo: SEO, lang: string = "en") {
+		mkdirSync('root/res/seo', { recursive: true })
 		const imagePathHash = createHash('md5').update(seo.image).digest('hex')
 		const squareSeoImagePath = `root/res/seo/${ imagePathHash }`
-		const squareSeoImage = await compressImage(
-			seo.image,
-			squareSeoImagePath,
-			600,
-			1,
-			{
-				quality: 65,
-				alt: 'SEO Image',
-				extensions: [ 'jpg' ]
-			}
-		)
+		if (!existsSync(squareSeoImagePath + '.jpg')) {
+			await compressImage(
+				seo.image,
+				squareSeoImagePath,
+				600,
+				1,
+				{
+					quality: 65,
+					alt: 'SEO Image',
+					extensions: [ 'jpg' ]
+				}
+			)
+		}
 		const wideSeoImagePath = `root/res/seo/${ imagePathHash }-wide`
-		const wideSeoImage = await compressImage(
-			seo.image,
-			wideSeoImagePath,
-			1200,
-			1.905,
-			{
-				quality: 65,
-				alt: 'SEO Image',
-				extensions: [ 'jpg' ]
-			}
-		)
+		if (!existsSync(wideSeoImagePath + '.jpg')) {
+			await compressImage(
+				seo.image,
+				wideSeoImagePath,
+				1200,
+				1.905,
+				{
+					quality: 65,
+					alt: 'SEO Image',
+					extensions: [ 'jpg' ]
+				}
+			)
+		}
 
 		return /* html */ `
 		<!DOCTYPE html>
@@ -77,11 +83,11 @@ export class PageShell {
 				<meta content="${ seo.type || 'article' }" property="og:type">
 				` : '' }
 				${ seo.image != null ? /* html */ `
-				<meta name="thumbnail" content="${ squareSeoImage }">
-				<meta name="og:image" content="${ squareSeoImage }">
+				<meta name="thumbnail" content="${ squareSeoImagePath }">
+				<meta name="og:image" content="${ squareSeoImagePath }">
 				<meta name="og:image:width" content="600">
 				<meta name="og:image:height" content="600">
-				<meta name="og:image" content="${ wideSeoImage }">
+				<meta name="og:image" content="${ wideSeoImagePath }">
 				<meta name="og:image:width" content="1200">
 				<meta name="og:image:height" content="630">
 				` : '' }
