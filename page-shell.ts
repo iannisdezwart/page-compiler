@@ -8,6 +8,7 @@ export interface SEO {
 	author: string
 	image?: string
 	type?: string
+	siteUrl?: string
 }
 
 export interface PageShellOptions {
@@ -40,36 +41,29 @@ export class PageShell {
 	}
 
 	async render(title: string, body: string, seo: SEO, lang: string = "en") {
-		mkdirSync('root/res/seo', { recursive: true })
-		const imagePathHash = createHash('md5').update(seo.image).digest('hex')
-		const squareSeoImagePath = `root/res/seo/${ imagePathHash }`
-		if (!existsSync(squareSeoImagePath + '.jpg')) {
-			await compressImage(
-				seo.image,
-				squareSeoImagePath,
-				600,
-				1,
-				{
-					quality: 65,
-					alt: 'SEO Image',
-					extensions: [ 'jpg' ]
-				}
-			)
+		let wideSeoImagePath: string
+
+		if (seo.image != null) {
+			mkdirSync('root/res/seo', { recursive: true })
+			const imagePathHash = createHash('md5').update(seo.image).digest('hex')
+			wideSeoImagePath = `/res/seo/${ imagePathHash }-wide`
+			if (!existsSync('root' + wideSeoImagePath + '.jpg')) {
+				await compressImage(
+					seo.image,
+					'root' + wideSeoImagePath,
+					1200,
+					1.905,
+					{
+						quality: 65,
+						alt: 'SEO Image',
+						extensions: [ 'jpg' ],
+						forceSize: true,
+					}
+				)
+			}
 		}
-		const wideSeoImagePath = `root/res/seo/${ imagePathHash }-wide`
-		if (!existsSync(wideSeoImagePath + '.jpg')) {
-			await compressImage(
-				seo.image,
-				wideSeoImagePath,
-				1200,
-				1.905,
-				{
-					quality: 65,
-					alt: 'SEO Image',
-					extensions: [ 'jpg' ]
-				}
-			)
-		}
+
+		const seoImagePrefix = seo.siteUrl || ''
 
 		return /* html */ `
 		<!DOCTYPE html>
@@ -83,11 +77,8 @@ export class PageShell {
 				<meta content="${ seo.type || 'article' }" property="og:type">
 				` : '' }
 				${ seo.image != null ? /* html */ `
-				<meta name="thumbnail" content="${ squareSeoImagePath }">
-				<meta name="og:image" content="${ squareSeoImagePath }">
-				<meta name="og:image:width" content="600">
-				<meta name="og:image:height" content="600">
-				<meta name="og:image" content="${ wideSeoImagePath }">
+				<meta name="thumbnail" content="${ seoImagePrefix + wideSeoImagePath }.jpg">
+				<meta name="og:image" content="${ seoImagePrefix + wideSeoImagePath }.jpg">
 				<meta name="og:image:width" content="1200">
 				<meta name="og:image:height" content="630">
 				` : '' }

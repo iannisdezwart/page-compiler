@@ -28,6 +28,7 @@ interface ImportImageOptions {
 	classes?: string[]
 	alt: string
 	extensions?: string[]
+	forceSize?: boolean
 }
 
 const imageMagick = graphicsMagick.subClass({ imageMagick: true })
@@ -40,7 +41,18 @@ export const compressImage = (
 	options: ImportImageOptions,
 ) => new Promise<void>(resolve => {
 	const imageState = imageMagick(path)
-		.resize(dimension, dimension / aspectRatio, '>')
+
+	if (options.forceSize) {
+		imageState
+			.resize(dimension, dimension / aspectRatio, '^')
+			.gravity('Center')
+			.extent(dimension, dimension / aspectRatio)
+	} else {
+		imageState
+			.resize(dimension, dimension / aspectRatio, '>')
+	}
+
+	imageState
 		.quality(options.quality)
 		.strip()
 		.interlace('Plane')
@@ -58,7 +70,7 @@ export const compressImage = (
 		log('info', `Processed image: ${ chalk.yellow(path) }`)
 
 		finishedImages++
-		if (finishedImages == 2) resolve()
+		if (finishedImages == options.extensions.length) resolve()
 	}
 
 	for (const extension of options.extensions) {
