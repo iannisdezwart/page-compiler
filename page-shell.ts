@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { compressImage } from './import-images'
 
-interface SEO {
+export interface SEO {
 	description: string
 	keywords: string[]
 	author: string
@@ -9,7 +9,7 @@ interface SEO {
 	type?: string
 }
 
-interface PageShellOptions {
+export interface PageShellOptions {
 	head?: string
 	tail?: string
 	bodyClasses?: string[]
