@@ -27,11 +27,12 @@ interface ImportImageOptions {
 	id?: string
 	classes?: string[]
 	alt: string
+	extensions?: string[]
 }
 
 const imageMagick = graphicsMagick.subClass({ imageMagick: true })
 
-const compressImage = (
+export const compressImage = (
 	path: string,
 	outputPath: string,
 	dimension: number,
@@ -60,8 +61,9 @@ const compressImage = (
 		if (finishedImages == 2) resolve()
 	}
 
-	imageState.write(outputPath + '.webp', imageWriteCallback(outputPath + '.webp'))
-	imageState.write(outputPath + '.jpg', imageWriteCallback(outputPath + '.jpg'))
+	for (const extension of options.extensions) {
+		imageState.write(outputPath + '.' + extension, imageWriteCallback(outputPath + '.' + extension))
+	}
 })
 
 export const importJPG = (
@@ -92,6 +94,7 @@ export const importJPG = (
 		quality: 65,
 		id: null,
 		classes: [],
+		extensions: [ 'jpg', 'webp' ],
 		...options
 	}
 
