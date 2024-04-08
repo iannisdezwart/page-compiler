@@ -71,9 +71,9 @@ export class PageShell {
 			<head>
 				<meta charset="utf-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				${ seo.type != null ? /* html */ `
 				<title>${ title }</title>
 				<meta content="${ title }" property="og:title">
+				${ seo.type != null ? /* html */ `
 				<meta content="${ seo.type || 'article' }" property="og:type">
 				` : '' }
 				${ seo.image != null ? /* html */ `
