@@ -56,7 +56,6 @@ export const compressImage = (
 		.quality(options.quality)
 		.strip()
 		.interlace('Plane')
-		.colorspace('RGB')
 		.samplingFactor(4, 2)
 
 	let finishedImages = 0
